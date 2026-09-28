@@ -21,8 +21,7 @@ Corrector automático de ejercicios de alemán A1, con revisión humana (HITL) y
 
 Toda esta explicación, junto con las capturas correspondientes, está también incluida dentro del PDF.
 
-## Índice del PDF (criterios de la rúbrica, 20% cada uno)
-
+## Índice del PDF 
 | # | Criterio (rúbrica) | Sección en el PDF | Páginas aprox. |
 |---|---|---|---|
 | 1 | Mapa de Arquitectura del Sistema | **Entregable 1: Diagrama y Arquitectura de Proceso**<br>— Propuesta de Automatización<br>— Diagrama de Arquitectura<br>— Descripción del Proceso con Capturas (Parte A: alumno, Parte B: IA, Parte C: HITL)<br>— Links y Evidencia Adicional (incluye evidencia de 5+ corridas) | 1–14 |
