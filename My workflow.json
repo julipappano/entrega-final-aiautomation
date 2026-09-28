@@ -1,0 +1,2006 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sos un asistente de corrección gramatical para alemán nivel A1. Tu tarea es analizar la respuesta de un alumno a un ejercicio de escritura y devolver una corrección estructurada.\n\nInstrucciones:\n1. Leé la respuesta del alumno e identificá todos los errores gramaticales.\n2. Generá el texto corregido completo, marcando cada corrección envolviendo la palabra o frase corregida en etiquetas <b></b>.\n3. Escribí una explicación breve en prosa de cada error: qué estaba mal y por qué.\n4. Para cada error, clasificalo contra el catálogo de reglas gramaticales A1. Tu única fuente de verdad para esta clasificación es la tabla de Airtable conectada como herramienta (\"Curriculum (gramatica)\") — consultala usando la tool de búsqueda antes de asignar cualquier código de regla. No uses tu conocimiento propio de gramática alemana para inventar o asumir un código. Al armar la búsqueda, los ÚNICOS campos que existen en esa tabla son \"Categoría\" (valores: Artikel/Pronomen, Verb, Satzbau, Nomen, Adjektiv, Wortbildung, Präposition), \"Tema gramatical\" y \"Ejemplo\" — no existe ningún campo de \"Nivel\", porque todas las reglas de esta tabla ya son de nivel A1; nunca filtres por nivel.\n5. Si un error no tiene ninguna coincidencia en esa tabla porque corresponde a un nivel superior a A1, corregilo igual en el texto de salida, pero NO lo incluyas en la lista de reglas_errores.\n6. Si la respuesta del alumno no tiene ningún error, el texto corregido es idéntico al original, la explicación indica que no se encontraron errores, y la lista de reglas_errores queda vacía.\n\nDevolvé únicamente el JSON solicitado, sin texto adicional antes o después.\n\nConsigna del ejercicio: {{ $json.consigna }}\nTipo de ejercicio: {{ $json.tipo_ejercicio }}\nRespuesta del alumno: {{ $json.respuesta }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        512,
+        -64
+      ],
+      "id": "973e2b09-f975-4ede-878b-667c3369497f",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 3
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appWDDplHIYZS05US",
+          "mode": "list",
+          "cachedResultName": "bot_aleman",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMas9t6cf15Q0wo",
+          "mode": "list",
+          "cachedResultName": "Curriculum (gramatica)",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US/tblMas9t6cf15Q0wo"
+        },
+        "filterByFormula": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Filter_By_Formula', ``, 'string') }}",
+        "returnAll": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        176
+      ],
+      "id": "90389fd9-8730-4545-bea3-1585d0644f10",
+      "name": "Search records in Airtable",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "pOzS7DtNUHCPbvUF",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"correccion_IA\": \"Ich <b>gehe</b> heute ins Kino.\",\n  \"explicacion_IA\": \"El verbo 'gehe' debe conjugarse en primera persona singular, no en infinitivo.\",\n  \"reglas_errores\": [\"GRAM-A1-03\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        176
+      ],
+      "id": "b30c7e4d-7d0d-4eb0-b62c-ed769339813c",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 15,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "authentication": "airtableOAuth2Api",
+        "baseId": {
+          "__rl": true,
+          "value": "appWDDplHIYZS05US",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblUc1PetpmISa4dz",
+          "mode": "id"
+        },
+        "triggerField": "Fecha rta",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -64
+      ],
+      "id": "e81cc368-b299-449a-b7f7-477858feee4f",
+      "name": "Trigger: \"Fecha rta\" nueva",
+      "retryOnFail": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "pOzS7DtNUHCPbvUF",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appWDDplHIYZS05US",
+          "mode": "list",
+          "cachedResultName": "bot_aleman",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUc1PetpmISa4dz",
+          "mode": "list",
+          "cachedResultName": "Registro de ejercicios",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US/tblUc1PetpmISa4dz"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Mapeo de variables1').item.json.record_id }}",
+            "Correccion IA": "={{ $json.output.correccion_IA }}",
+            "Explicacion IA": "={{ $json.output.explicacion_IA }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Row",
+              "displayName": "Row",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_rtas",
+              "displayName": "ID_rtas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha rta",
+              "displayName": "Fecha rta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_alumno",
+              "displayName": "ID_alumno",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email (from ID_alumno)",
+              "displayName": "Email (from ID_alumno)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Nombre y Apellido (from Alumno)",
+              "displayName": "Nombre y Apellido (from Alumno)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ejercicio",
+              "displayName": "Ejercicio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Tema (from Tema (ID Curriculum)) (from Ejercicio)",
+              "displayName": "Tema (from Tema (ID Curriculum)) (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Tema (ID Curriculum) (from Ejercicio)",
+              "displayName": "Tema (ID Curriculum) (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Tipo de ejercicio (from Ejercicio)",
+              "displayName": "Tipo de ejercicio (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Consigna (from Ejercicio)",
+              "displayName": "Consigna (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Respuesta",
+              "displayName": "Respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Correccion IA",
+              "displayName": "Correccion IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Explicacion IA",
+              "displayName": "Explicacion IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Correccion docente",
+              "displayName": "Correccion docente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Explicacion docente",
+              "displayName": "Explicacion docente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Correccion final",
+              "displayName": "Correccion final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Explicacion final",
+              "displayName": "Explicacion final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        -64
+      ],
+      "id": "74fb59e5-2c2b-4b9e-8922-b4ab170bc9b0",
+      "name": "Actualización \"Registro de ejercicios\"",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "pOzS7DtNUHCPbvUF",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "reglas_errores",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -208
+      ],
+      "id": "5c1d2dde-88c1-448f-b770-8ee3c5a53eb3",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appWDDplHIYZS05US",
+          "mode": "list",
+          "cachedResultName": "bot_aleman",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMas9t6cf15Q0wo",
+          "mode": "list",
+          "cachedResultName": "Curriculum (gramatica)",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US/tblMas9t6cf15Q0wo"
+        },
+        "filterByFormula": "={ID_gramatica} = '{{ $json.reglas_errores }}'",
+        "returnAll": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1376,
+        -208
+      ],
+      "id": "4b2300ea-1cb4-4e1b-bd9d-f88d307d923e",
+      "name": "Buscar registros en \"Curriculum (gramatica)\"",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "pOzS7DtNUHCPbvUF",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appWDDplHIYZS05US",
+          "mode": "list",
+          "cachedResultName": "bot_aleman",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblZ01N5R1B1SaWWR",
+          "mode": "list",
+          "cachedResultName": "Error log",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US/tblZ01N5R1B1SaWWR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Regla gramatical": "={{ [$json.id] }}",
+            "ID_rtas": "={{ [$('Mapeo de variables1').item.json.record_id] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Row",
+              "displayName": "Row",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_error",
+              "displayName": "ID_error",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_rtas_log",
+              "displayName": "ID_rtas_log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_rtas",
+              "displayName": "ID_rtas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID_alumno (from ID_rtas)",
+              "displayName": "ID_alumno (from ID_rtas)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Nombre y Apellido (from Alumno) (from ID_rtas)",
+              "displayName": "Nombre y Apellido (from Alumno) (from ID_rtas)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ejercicio (from ID_rtas)",
+              "displayName": "Ejercicio (from ID_rtas)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Regla gramatical",
+              "displayName": "Regla gramatical",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": false
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        -208
+      ],
+      "id": "df6f9d03-59b2-48a4-badf-c71f26d94fb3",
+      "name": "Crear nuevos registros en \"Error log\"",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "pOzS7DtNUHCPbvUF",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3431b758-3d73-479c-8b79-2886e55ee9a2",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1472,
+        176
+      ],
+      "id": "a9875cb8-0b39-42fe-9cd7-1f4a38d979d5",
+      "name": "If",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C3ALMSN3W",
+          "mode": "list",
+          "cachedResultName": "correccion_ejercicios"
+        },
+        "message": "=📝 *Nuevo ejercicio para revisar*\n\n*Alumno:* {{ $('Mapeo de variables1').item.json.nombre_alumno }}\n*Temática:* {{ $('Mapeo de variables1').item.json.tema_texto }}\n*Tipo de ejercicio:* {{ $('Mapeo de variables1').item.json.tipo_ejercicio }}\n\n*Consigna:*\n{{ $('Mapeo de variables1').item.json.consigna }}\n\n*Respuesta del alumno:*\n{{ $('Mapeo de variables1').item.json.respuesta }}\n\n*Corrección de la IA:*\n{{ $('AI Agent').item.json.output.correccion_IA }}\n\n*Explicación de la IA:*\n{{ $('AI Agent').item.json.output.explicacion_IA }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Aprobar",
+            "disapproveLabel": "Rechazar"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1264,
+        176
+      ],
+      "id": "360dc116-22e7-473b-954b-8b6a26d87078",
+      "name": "Notificar docente y esperar respuesta",
+      "webhookId": "7a5121a4-684f-4fae-9ace-6a92be1e5076",
+      "retryOnFail": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "2qrDxn3TTKoZBZMr",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Mapeo de variables1').item.json.email_alumno }}",
+        "subject": "=Corrección de tu ejercicio:  {{ $('Mapeo de variables1').item.json.tema_texto }}",
+        "message": "=<!DOCTYPE html> \n<html> \n<body style=\"font-family: Arial, sans-serif; color: #333; line-height: 1.6;\">    \n<p>Hola {{ $('Mapeo de variables1').item.json.nombre_alumno }},</p>    \n<p>Ya tenés la corrección de tu ejercicio sobre <strong>{{ $('Mapeo de variables1').item.json.tema_texto }}</strong>.</p>    \n\n<h3 style=\"color: #2c5282;\">Tu respuesta:</h3>   \n<p style=\"background-color: #f7f7f7; padding: 12px; border-radius: 4px;\">     {{ $('Mapeo de variables1').item.json.respuesta }}   </p>\n\n<h3 style=\"color: #2c5282;\">Corrección:</h3>\n<p style=\"background-color: #f0f7f0; padding: 12px; border-radius: 4px;\">     {{ $('AI Agent').item.json.output.correccion_IA }}   \n</p>    \n\n<h3 style=\"color: #2c5282;\">Explicación:</h3>   \n<p>     {{ $('AI Agent').item.json.output.explicacion_IA }}   </p>    \n\n<p>Cualquier duda sobre la corrección, no dudes en escribirme.</p>    \n\n<p>Saludos</p>  \n</body> \n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        160
+      ],
+      "id": "02b04672-9aa4-428a-ac67-ede15c71aea2",
+      "name": "Corección al alumno",
+      "webhookId": "0ee09784-7746-409b-b6c1-7af26190821a",
+      "retryOnFail": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G97q2AtKItdOw2Cd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appWDDplHIYZS05US",
+          "mode": "list",
+          "cachedResultName": "bot_aleman",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUc1PetpmISa4dz",
+          "mode": "list",
+          "cachedResultName": "Registro de ejercicios",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US/tblUc1PetpmISa4dz"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Mapeo de variables1').item.json.record_id }}",
+            "Correccion enviada": "=  {{ $now.toFormat('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Row",
+              "displayName": "Row",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_rtas",
+              "displayName": "ID_rtas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha rta",
+              "displayName": "Fecha rta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_alumno",
+              "displayName": "ID_alumno",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email (from ID_alumno)",
+              "displayName": "Email (from ID_alumno)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Nombre y Apellido (from Alumno)",
+              "displayName": "Nombre y Apellido (from Alumno)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ejercicio",
+              "displayName": "Ejercicio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Tema (from Tema (ID Curriculum)) (from Ejercicio)",
+              "displayName": "Tema (from Tema (ID Curriculum)) (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Tema (ID Curriculum) (from Ejercicio)",
+              "displayName": "Tema (ID Curriculum) (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Tipo de ejercicio (from Ejercicio)",
+              "displayName": "Tipo de ejercicio (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Consigna (from Ejercicio)",
+              "displayName": "Consigna (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Respuesta",
+              "displayName": "Respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Correccion IA",
+              "displayName": "Correccion IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Explicacion IA",
+              "displayName": "Explicacion IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Correccion docente",
+              "displayName": "Correccion docente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Explicacion docente",
+              "displayName": "Explicacion docente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Correccion final",
+              "displayName": "Correccion final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Explicacion final",
+              "displayName": "Explicacion final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Correccion enviada",
+              "displayName": "Correccion enviada",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Error log",
+              "displayName": "Error log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2224,
+        160
+      ],
+      "id": "8181c09b-9447-430d-bbe1-4b0c055aa287",
+      "name": "Actualización fecha de envío de email al alumno",
+      "retryOnFail": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "pOzS7DtNUHCPbvUF",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {
+          "maxOutputTokens": 1500
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        144
+      ],
+      "id": "d1d4ec69-cad2-4b46-9bf1-098aff3e322b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wtfTsAyALjlWUFBK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appWDDplHIYZS05US",
+          "mode": "list",
+          "cachedResultName": "bot_aleman",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUc1PetpmISa4dz",
+          "mode": "list",
+          "cachedResultName": "Registro de ejercicios",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US/tblUc1PetpmISa4dz"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Correccion docente": "={{ $json.data['Escribí la corrección:'] }}",
+            "Explicacion docente": "={{ $json.data['Escribí la explicación:'] }}",
+            "ID_rtas": "={{ $('Mapeo de variables1').item.json.id_rtas }}"
+          },
+          "matchingColumns": [
+            "ID_rtas"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Row",
+              "displayName": "Row",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_rtas",
+              "displayName": "ID_rtas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha rta",
+              "displayName": "Fecha rta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_alumno",
+              "displayName": "ID_alumno",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email (from ID_alumno)",
+              "displayName": "Email (from ID_alumno)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Nombre y Apellido (from Alumno)",
+              "displayName": "Nombre y Apellido (from Alumno)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ejercicio",
+              "displayName": "Ejercicio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Tema (from Tema (ID Curriculum)) (from Ejercicio)",
+              "displayName": "Tema (from Tema (ID Curriculum)) (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Tema (ID Curriculum) (from Ejercicio)",
+              "displayName": "Tema (ID Curriculum) (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Tipo de ejercicio (from Ejercicio)",
+              "displayName": "Tipo de ejercicio (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Consigna (from Ejercicio)",
+              "displayName": "Consigna (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Respuesta",
+              "displayName": "Respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Correccion IA",
+              "displayName": "Correccion IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Explicacion IA",
+              "displayName": "Explicacion IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Correccion docente",
+              "displayName": "Correccion docente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Explicacion docente",
+              "displayName": "Explicacion docente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Correccion final",
+              "displayName": "Correccion final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Explicacion final",
+              "displayName": "Explicacion final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Correccion enviada",
+              "displayName": "Correccion enviada",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Error log",
+              "displayName": "Error log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1840,
+        416
+      ],
+      "id": "1d8b97cc-8ac2-4611-a1b2-1bd46a68b140",
+      "name": "Actualizar correccion docente",
+      "retryOnFail": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "pOzS7DtNUHCPbvUF",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C3ALMSN3W",
+          "mode": "list",
+          "cachedResultName": "correccion_ejercicios"
+        },
+        "message": "Completá la información debajo con las correcciones necesarias. ",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Escribí la corrección:"
+            },
+            {
+              "fieldLabel": "Escribí la explicación:"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1664,
+        416
+      ],
+      "id": "7c70c8c7-c751-4961-9c2b-6061ced8eea7",
+      "name": "Pedido de correccion docente",
+      "webhookId": "7a09f6af-d25f-4ed0-8b34-c4ec1831602c",
+      "retryOnFail": false,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "2qrDxn3TTKoZBZMr",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Mapeo de variables1').item.json.email_alumno }}",
+        "subject": "=Corrección de tu ejercicio:  {{ $('Mapeo de variables1').item.json.tema_texto }}",
+        "message": "=<!DOCTYPE html> \n<html> \n<body style=\"font-family: Arial, sans-serif; color: #333; line-height: 1.6;\">    \n<p>Hola {{ $('Mapeo de variables1').item.json.nombre_alumno }},</p>    \n<p>Ya tenés la corrección de tu ejercicio sobre <strong>{{ $('Mapeo de variables1').item.json.tema_texto }}</strong>.</p>    \n\n<h3 style=\"color: #2c5282;\">Tu respuesta:</h3>   \n<p style=\"background-color: #f7f7f7; padding: 12px; border-radius: 4px;\">     {{ $('Mapeo de variables1').item.json.respuesta }}   </p>\n\n<h3 style=\"color: #2c5282;\">Corrección:</h3>\n<p style=\"background-color: #f0f7f0; padding: 12px; border-radius: 4px;\">    {{ $json.fields['Correccion docente'] }} \n</p>    \n\n<h3 style=\"color: #2c5282;\">Explicación:</h3>   \n<p>   {{ $json.fields['Explicacion docente'] }}     </p>    \n\n<p>Cualquier duda sobre la corrección, no dudes en escribirme.</p>    \n\n<p>Saludos</p>  \n</body> \n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2016,
+        416
+      ],
+      "id": "34b971e8-3342-42c0-a6af-566540e3b6c9",
+      "name": "Corección al alumno2",
+      "webhookId": "0ee09784-7746-409b-b6c1-7af26190821a",
+      "retryOnFail": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G97q2AtKItdOw2Cd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appWDDplHIYZS05US",
+          "mode": "list",
+          "cachedResultName": "bot_aleman",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUc1PetpmISa4dz",
+          "mode": "list",
+          "cachedResultName": "Registro de ejercicios",
+          "cachedResultUrl": "https://airtable.com/appWDDplHIYZS05US/tblUc1PetpmISa4dz"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Mapeo de variables1').item.json.record_id }}",
+            "Correccion enviada": "=  {{ $now.toFormat('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Row",
+              "displayName": "Row",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_rtas",
+              "displayName": "ID_rtas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha rta",
+              "displayName": "Fecha rta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ID_alumno",
+              "displayName": "ID_alumno",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email (from ID_alumno)",
+              "displayName": "Email (from ID_alumno)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Nombre y Apellido (from Alumno)",
+              "displayName": "Nombre y Apellido (from Alumno)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ejercicio",
+              "displayName": "Ejercicio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Tema (from Tema (ID Curriculum)) (from Ejercicio)",
+              "displayName": "Tema (from Tema (ID Curriculum)) (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Tema (ID Curriculum) (from Ejercicio)",
+              "displayName": "Tema (ID Curriculum) (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Tipo de ejercicio (from Ejercicio)",
+              "displayName": "Tipo de ejercicio (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Consigna (from Ejercicio)",
+              "displayName": "Consigna (from Ejercicio)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Respuesta",
+              "displayName": "Respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Correccion IA",
+              "displayName": "Correccion IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Explicacion IA",
+              "displayName": "Explicacion IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Correccion docente",
+              "displayName": "Correccion docente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Explicacion docente",
+              "displayName": "Explicacion docente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Correccion final",
+              "displayName": "Correccion final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Explicacion final",
+              "displayName": "Explicacion final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Correccion enviada",
+              "displayName": "Correccion enviada",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Error log",
+              "displayName": "Error log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2192,
+        416
+      ],
+      "id": "5b8f494b-b7ad-4982-8fdf-92b78fd8bf45",
+      "name": "Actualización fecha de envío de email al alumno2",
+      "retryOnFail": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "pOzS7DtNUHCPbvUF",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1072,
+        160
+      ],
+      "id": "458bf653-ead4-4cf0-9be0-cf04933abd02",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "76b62e9e-d216-4158-beff-331687e2b685",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "028f1213-1a98-485d-9582-4fbc4c6766ab",
+              "name": "id_ejercicio",
+              "value": "={{ $json.fields.Ejercicio[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "49e7597c-78d4-411e-ab81-a4743593958a",
+              "name": "tipo_ejercicio",
+              "value": "={{ $json.fields['Tipo de ejercicio (from Ejercicio)'][0] }}",
+              "type": "string"
+            },
+            {
+              "id": "4c760531-98cf-4ef9-b6ad-2a35cefb946a",
+              "name": "consigna",
+              "value": "={{ $json.fields['Consigna (from Ejercicio)'][0] }}",
+              "type": "string"
+            },
+            {
+              "id": "5fb555ab-c3a3-465a-b7df-534947bcd4bc",
+              "name": "respuesta",
+              "value": "={{ $json.fields.Respuesta }}",
+              "type": "string"
+            },
+            {
+              "id": "a3f94d2b-b577-4b8e-9baf-caee2f5eb01d",
+              "name": "id_alumno",
+              "value": "={{ $json.fields.ID_alumno[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "2c1c7257-221c-45cb-b307-619b42bd66d2",
+              "name": "nombre_alumno",
+              "value": "={{ $json.fields['Nombre y Apellido (from Alumno)'][0] }}",
+              "type": "string"
+            },
+            {
+              "id": "b21da04a-9f7d-42e4-bcae-b494672a9ede",
+              "name": "id_rtas",
+              "value": "={{ $json.fields.ID_rtas }}",
+              "type": "string"
+            },
+            {
+              "id": "2eb527f5-bf4e-4f9f-9e3d-6624f9463960",
+              "name": "record_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "ea531132-1a83-4d11-a37a-ccaf32c420cf",
+              "name": "email_alumno",
+              "value": "={{ $json.fields['Email (from ID_alumno)'][0] }}",
+              "type": "string"
+            },
+            {
+              "id": "8e983613-14e5-43ab-9016-aeaf86eada84",
+              "name": "tema_texto",
+              "value": "={{ $json.fields['Tema (from Tema (ID Curriculum)) (from Ejercicio)'][0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        304,
+        -64
+      ],
+      "id": "c3a2a0a6-5ed5-4af8-bd17-3f16149f631c",
+      "name": "Mapeo de variables1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "04d13e10-1c91-4daf-9159-fde1b02ba55d",
+              "name": "reglas_errores",
+              "value": "={{ $('AI Agent').item.json.output.reglas_errores }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1024,
+        -208
+      ],
+      "id": "d136eb3e-d6d0-4e4f-98e0-906182e65bac",
+      "name": "Mapeo de variables2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Search records in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger: \"Fecha rta\" nueva": {
+      "main": [
+        [
+          {
+            "node": "Mapeo de variables1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Actualización \"Registro de ejercicios\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualización \"Registro de ejercicios\"": {
+      "main": [
+        [
+          {
+            "node": "Mapeo de variables2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Buscar registros en \"Curriculum (gramatica)\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar registros en \"Curriculum (gramatica)\"": {
+      "main": [
+        [
+          {
+            "node": "Crear nuevos registros en \"Error log\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear nuevos registros en \"Error log\"": {
+      "main": [
+        []
+      ]
+    },
+    "Notificar docente y esperar respuesta": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Corección al alumno",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pedido de correccion docente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Corección al alumno": {
+      "main": [
+        [
+          {
+            "node": "Actualización fecha de envío de email al alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pedido de correccion docente": {
+      "main": [
+        [
+          {
+            "node": "Actualizar correccion docente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar correccion docente": {
+      "main": [
+        [
+          {
+            "node": "Corección al alumno2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Corección al alumno2": {
+      "main": [
+        [
+          {
+            "node": "Actualización fecha de envío de email al alumno2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificar docente y esperar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualización fecha de envío de email al alumno2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualización fecha de envío de email al alumno": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapeo de variables1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapeo de variables2": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e84178bb-f3a7-4e14-a99f-c7c14bf6529d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f67b4dd0138d0629cd2fd7e6caea4cc7b48d5b29a9c359102a78c1d93bd43771"
+  },
+  "nodeGroups": [],
+  "id": "XN9ipPICbnwgN44l",
+  "tags": []
+}
