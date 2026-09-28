@@ -7,7 +7,7 @@ Corrector automático de ejercicios de alemán A1, con revisión humana (HITL) y
 | Recurso | Link | Acceso |
 |---|---|---|
 | Base de datos (Airtable, modo lectura) | https://airtable.com/appWDDplHIYZS05US/shr8rIVyPkIJCg2o1 | Público |
-| Dashboard de KPIs (Airtable Interface) | https://airtable.com/appWDDplHIYZS05US/pag69nPeQm4zZKjdY | Solo colaboradores de la base (no publicado a la web) |
+| Dashboard de KPIs (Airtable Interface) | https://airtable.com/appWDDplHIYZS05US/pag69nPeQm4zZKjdY | Solo colaboradores de la base (no publicado a la web por limitaciones de plan gratuito) |
 
 ## Contenido del repositorio
 
