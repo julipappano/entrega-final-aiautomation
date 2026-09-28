@@ -22,10 +22,10 @@ Corrector automático de ejercicios de alemán A1, con revisión humana (HITL) y
 Toda esta explicación, junto con las capturas correspondientes, está también incluida dentro del PDF.
 
 ## Índice del PDF 
-| # | Criterio (rúbrica) | Sección en el PDF | Páginas aprox. |
+| # | Criterio (rúbrica) | Sección en el PDF | Páginas |
 |---|---|---|---|
-| 1 | Mapa de Arquitectura del Sistema | **Entregable 1: Diagrama y Arquitectura de Proceso**<br>— Propuesta de Automatización<br>— Diagrama de Arquitectura<br>— Descripción del Proceso con Capturas (Parte A: alumno, Parte B: IA, Parte C: HITL)<br>— Links y Evidencia Adicional (incluye evidencia de 5+ corridas) | 1–14 |
-| 2 | Manual Operativo de Estructuras de Datos | **Entregable 2: Manual operativo de datos**<br>— 1. Esquema de tablas vinculadas de Airtable<br>— 2. Esquemas JSON de transferencia entre integraciones (2.1 a 2.14, incluye Split Out, búsqueda de regla gramatical, creación en Error log, Loop Over Items)<br>— 3. Resumen del flujo de datos (diagrama) | 15–26 |
+| 1 | Mapa de Arquitectura del Sistema | **Entregable 1: Diagrama y Arquitectura de Proceso**<br>— Propuesta de Automatización<br>— Diagrama de Arquitectura<br>— Descripción del Proceso con Capturas (Parte A: alumno, Parte B: IA, Parte C: HITL)<br>— Links y Evidencia Adicional (incluye evidencia de 5+ corridas) | 1–13 |
+| 2 | Manual Operativo de Estructuras de Datos | **Entregable 2: Manual operativo de datos**<br>— 1. Esquema de tablas vinculadas de Airtable<br>— 2. Esquemas JSON de transferencia entre integraciones (2.1 a 2.14, incluye Split Out, búsqueda de regla gramatical, creación en Error log, Loop Over Items)<br>— 3. Resumen del flujo de datos (diagrama) | 14–26 |
 | 3 | Estrategia de Optimización de Costos y Recursos | **Entregable 3: Costos**<br>— Cuadro comparativo de modelos (Gemini Flash-Lite, GPT-4o-mini, Claude Haiku, GPT-4o, Claude Sonnet, Batch API)<br>— Cálculo base de la estimación<br>— Ahorro estimado | 27–28 |
 | 4 | Malla de Seguridad, Privacidad y Resiliencia | **Entregable 4: Documentación de Seguridad y Resiliencia**<br>— 1. Minimización de datos<br>— 2. Manejo de errores (Retry On Fail diferenciado por tipo de nodo)<br>— 3. Puntos de Human-in-the-loop<br>— 4. Test de estrés (5+ corridas, camino infeliz, caso de dos alumnos simultáneos) | 29–31 |
 | 5 | Dashboard de Control Ejecutivo | **Entregable 5: Dashboard de KPIs**<br>— Volumen total de ejercicios<br>— Distribución de ejercicios por estado<br>— Corrección IA vs. docente<br>— Errores gramaticales más comunes | 32–33 |
