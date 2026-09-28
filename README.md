@@ -18,6 +18,7 @@ Corrector automático de ejercicios de alemán A1, con revisión humana (HITL) y
   - Mensaje de Slack con el HITL en acción (notificación al docente con botones Aprobar/Rechazar)
   - Email de Gmail enviado al alumno con la corrección
   - Registro en Airtable mostrando el estado final (Finalizado) de un ejercicio
+- `video-demo` — video con breve demostración del flujo
 
 Toda esta explicación, junto con las capturas correspondientes, está también incluida dentro del PDF.
 
